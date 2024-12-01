@@ -3,10 +3,7 @@
 */.DS_Store
 
 # Ignore specific file types in the images folder
-*/images/*.svg
-*/images/*.pdf
-*/images/*.png
-*/images/*.jpg
+*/images/
 
 # Optional: Ignore all .svg and .pdf files across the project
 *.svg
