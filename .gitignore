@@ -1,9 +1,13 @@
-*.log
-*.pdf
-*.svg
-*.png
-*.jpeg
-*.jpg
-*/images
-*.DS_Store
-*/*/.DS_Store
+# Ignore system files
+.DS_Store
+*/.DS_Store
+
+# Ignore specific file types in the images folder
+*/images/*.svg
+*/images/*.pdf
+*/images/*.png
+*/images/*.jpg
+
+# Optional: Ignore all .svg and .pdf files across the project
+# *.svg
+# *.pdf
