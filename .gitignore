@@ -9,5 +9,7 @@
 */images/*.jpg
 
 # Optional: Ignore all .svg and .pdf files across the project
-# *.svg
-# *.pdf
+*.svg
+*.pdf
+*.jpg
+*.svg
