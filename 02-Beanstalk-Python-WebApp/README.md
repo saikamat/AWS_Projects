@@ -28,7 +28,7 @@ TODO-IMAGE
 1. Create Python Web App - `applications.py`
 2. Run it as simple Flask application and see if accessible on `127.0.0.1:5000`
 
-TODO-IMAGE
+![image](Screenshot%202024-12-08%20at%2017.44.36.png)
 
 ## II. AWS Configuration using CLI
 1. `aws configure`
@@ -71,7 +71,7 @@ eb status
 ```
 Use the `CNAME` from the status and add it to the browser.
 
-TODO-IMAGE
+![image](Screenshot%202024-12-08%20at%2023.23.36.png)
 
 ## V. Make changes to your application
 1. Open `applications.py`
@@ -90,8 +90,6 @@ def home():
 eb deploy
 ```
 4. Verify on browser
-   
-TODO-IMAGE
 
 ## VI. Edit Environment Configurations
 Configuring environment variables in AWS Elastic Beanstalk is an important step, especially if your application relies on sensitive information (e.g., API keys, database credentials, or configuration settings) or needs specific runtime configurations. 
@@ -103,13 +101,14 @@ Environment variables are key-value pairs that are passed to your application at
 
 ### 1. Configure Environment Variables in Elastic Beanstalk using AWS Console
 1. Open the Elastic Beanstalk Console and Select your application and environment.
+![image](Screenshot%202024-12-09%20at%2010.43.28.png)
 2. In the left-hand menu, click on Configuration.
 3. Scroll all the way down till you see `Environment Variables`. This is where you add your own variables
 
-TODO-IMAGE
+![image](Screenshot%202024-12-09%20at%2012.24.45.png)
 
 4. Save Changes
-
+![image](Screenshot%202024-12-09%20at%2012.26.42.png)
 ### 2. Access Environment Variables in Your Application
 1. Once the environment variables are configured, your application can access them using the `os` module in Python. 
 
@@ -149,7 +148,7 @@ eb deploy
 ```
 3. Verify on browser
    
-TODO-IMAGE
+![image](Screenshot%202024-12-09%20at%2012.32.18.png)
 
 ## Troubleshooting
 If you can't access the elastic beanstalk URL, here are the steps to diagnose the error.
