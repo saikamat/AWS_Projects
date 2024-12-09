@@ -4,7 +4,7 @@ Elastic Beanstalk is a Platform-as-a-Service (PaaS) that abstracts infrastructur
 
 Here's how it converses with various components
 
-TODO-IMAGE
+![image](02-Beanstalk.drawio.png)
 
 
 ### Components
