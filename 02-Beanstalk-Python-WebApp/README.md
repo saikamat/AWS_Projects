@@ -1,4 +1,5 @@
 # RUNNING A WEB APP USING AWS BEANSTALK
+>Note - switch to `assets` branch for illustrations
 ## Introduction
 Elastic Beanstalk is a Platform-as-a-Service (PaaS) that abstracts infrastructure management. It automatically provisions and manages resources like EC2 instances, load balancers, and auto-scaling groups.
 
