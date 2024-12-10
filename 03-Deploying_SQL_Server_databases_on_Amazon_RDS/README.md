@@ -1,9 +1,10 @@
 # Deploying SQL Server databases on Amazon RDS
-
+> Swich to `assets` branch for illustrated Readme.
 ## Table of Contents
 - [Deploying SQL Server databases on Amazon RDS](#deploying-sql-server-databases-on-amazon-rds)
   - [Table of Contents](#table-of-contents)
-  - [High Level Architecture and Workflow](#high-level-architecture-and-workflow)
+  - [High Level Architecture](#high-level-architecture)
+  - [Workflow](#workflow)
   - [Deploy VPC](#deploy-vpc)
     - [Create VPC](#create-vpc)
     - [Create Internet Gateway](#create-internet-gateway)
@@ -23,7 +24,34 @@
   - [Appendix](#appendix)
     - [Troubleshooting](#troubleshooting)
 
-## High Level Architecture and Workflow
+## High Level Architecture
+Here, I've created a DB instance and understood important concepts relating to backups, security, scaling, optimizing, and monitoring my DB instance.
+
+I need the following to deploy a SQL Server on RDS.
+|Service|Role|
+|---|---|
+|Amazon RDS|managed DB service to simplify setup, operation, scaling of SQL server databases|
+|VPC|secure network environment for DB|
+|Security Groups|Virtual firewalls to control in & outbound traffic|
+|Cloudwatch|Monitor and track RDS instance's health|
+|Client Application|Used by end-user to connect to SQL Server database and send queries|
+
+![image](./images/)
+
+## Workflow
+```mermaid
+graph LR
+
+A(Start)
+
+A --> B[Look for an item]
+
+B --> C{Did you find it?}
+C -->|Yes| D(Stop looking)
+C -->|No| E{Do you need it?}
+E -->|Yes| B
+E -->|No| D
+```
 ## Deploy VPC
 ### Create VPC
 ### Create Internet Gateway
