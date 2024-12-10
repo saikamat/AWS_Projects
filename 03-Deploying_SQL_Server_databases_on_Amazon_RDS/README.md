@@ -50,16 +50,22 @@ F --> B
 B --> A
 ```
 ## Deploy VPC
-![image](./assets/Screenshot%202024-12-09%20at%2021.13.28.png)
+I started with deploying a virtual private cloud which will host the setup.
 ### Create VPC
 ![image](./assets/Screenshot%202024-12-09%20at%2021.13.28.png)
+Go to [AWS Console](https://console.aws.amazon.com/console/home), and look for `VPC`
+Set configurations as illustrated in above picture.
 ### Create Subnet
 ![image](./assets/Screenshot%202024-12-09%20at%2021.14.30.png)
+Head to VPC Dashboard and choose `Subnets` and `Create Subnet`
 ![image](./assets/Screenshot%202024-12-09%20at%2021.17.06.png)
+Choose the VPC you created before. We create two subnets operating in two regions -> `10.0.1.0/24` having 256 IP addresses in one availability zone, 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.19.25.png)
+and `10.0.2.0/24` with another set of 256 IP Addresses in a different availability zone.
 ### Create Internet Gateway
+When your instances from inside the VPC wish to communicate with the Internet, you can use the `Internet Gateway`. 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.22.47.png)
-
+Head to VPC Dashboard, and choose `Internet gateways` and create one.
 ![image](./assets/Screenshot%202024-12-09%20at%2021.24.44.png)
 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.25.31.png)
@@ -119,6 +125,7 @@ Therefore I use Azure Data Studio available from [here](https://learn.microsoft.
 
 ![image](./assets/Screenshot%202024-12-10%20at%2010.51.24.png)
 
+![image](./assets/chrome-capture-2024-12-10.gif)
 ## Appendix
 ![image](./assets/Screenshot%202024-12-10%20at%2011.15.44.png)
 ### Troubleshooting
