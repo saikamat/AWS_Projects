@@ -30,7 +30,7 @@ def generate_markdown_from_images(images_dir, output_file):
         print(f"An error occurred: {e}")
 
 # Define the directory containing images and the output markdown file
-images_directory = "images"
+images_directory = "03-Deploying_SQL_Server_databases_on_Amazon_RDS/assets"
 output_markdown_file = "output.md"
 
 # Generate the markdown file
