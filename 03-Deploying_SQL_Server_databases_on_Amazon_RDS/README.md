@@ -42,15 +42,15 @@ I need the following to deploy a SQL Server on RDS.
 ```mermaid
 graph LR
 
-A(Start)
+A(User sends request)
 
-A --> B[Look for an item]
-
-B --> C{Did you find it?}
-C -->|Yes| D(Stop looking)
-C -->|No| E{Do you need it?}
-E -->|Yes| B
-E -->|No| D
+A --> B(Request routed through VPC)
+B --> C{Authorized by SG?}
+C -->|No| E(Blocked)
+C -->|Yes| D(RDS Instance)
+D -->|Process Request|F(Microsoft SQL Server)
+F --> B
+B --> A
 ```
 ## Deploy VPC
 ### Create VPC
