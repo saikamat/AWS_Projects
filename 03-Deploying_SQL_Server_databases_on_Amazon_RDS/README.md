@@ -128,41 +128,71 @@ Navigate to AWS Console and type in `RDS` and create RDS database.
 Since I use Mac, SSML isn't natively available to me.
 Therefore I use Azure Data Studio available from [here](https://learn.microsoft.com/en-us/azure-data-studio/download-azure-data-studio?tabs=macOS-install%2Cwin-user-install%2Credhat-install%2Cwindows-uninstall%2Credhat-uninstall#download-azure-data-studio)
 ![image](./assets/Screenshot%202024-12-09%20at%2022.02.01.png)
+Click on `Create a connection`.
 ### Configure Connections
 ![image](./assets/Screenshot%202024-12-09%20at%2022.22.09.png)
+Once the RDS is ready, copy the endpoint from `Connectivity and Security` tab,
 ![image](./assets/Screenshot%202024-12-09%20at%2022.23.28.png)
-
+to the Connections Config of Azure Data Studio.
+In the `Advanced` tab, add port no as `1433`.
 ### Play with database
 ![image](./assets/Screenshot%202024-12-10%20at%2010.12.03.png)
+Once connected, you'll see above visuals.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.27.01.png)
+And on the left tab, you'll see list of databases.
 #### Run SQL queries to interact with your database.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.27.11.png)
-
+To create a New Query to your database, tap `File`>>`New Query`
 ![image](./assets/Screenshot%202024-12-10%20at%2010.28.13.png)
-
+In the query tab, try an SQL query
+```sql
+SELECT @@VERSION;
+```
 ![image](./assets/Screenshot%202024-12-10%20at%2010.28.37.png)
+You should see results as above. As expected, you can see the Microsoft SQL Server created in previous steps.
 #### Create tables, insert data, and manage your database schema.
+You can continue exploring RDS, by creating a new database.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.29.27.png)
+Create new employees information.
+```sql
+INSERT INTO Employees (EmployeeID, FirstName, LastName, HireDate)  
+VALUES (1, 'John', 'Doe', '2024-01-01');  
+```
 ![image](./assets/Screenshot%202024-12-10%20at%2010.36.24.png)
-
+```sql
+UPDATE Employees  
+SET LastName = 'Smith'  
+WHERE EmployeeID = 1;  
+```
+Update Employee information.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.37.00.png)
+
 ![image](./assets/Screenshot%202024-12-10%20at%2011.03.59.png)
+You can preview the created database in the left tab.
 #### Monitor and optimize database performance using tools like Performance Insights in the RDS Dashboard.
+You can monitor and optimise performance of your SQL server database. With performance insights, you can see real-time and historical performance metrics of your database.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.43.54.png)
-
+Head to RDS Dashboard and tap on `Performance insights`
 ![image](./assets/Screenshot%202024-12-10%20at%2010.45.32.png)
-
+View metrics such as database load.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.46.01.png)
-
+Top SQL queries show the most resource intensive queries.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.46.40.png)
-
+Wait events highlight bottlenecks in query execution.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.51.00.png)
-
+CloudWatch provides detailed metrics for your RDS instance, such as CPU utilization, memory usage, disk I/O, and network traffic. 
 ![image](./assets/Screenshot%202024-12-10%20at%2010.51.24.png)
+Head to AWS Dashboard, look for Cloudwatch. Click on Service, `RDS`.
+
 
 ![image](./assets/chrome-capture-2024-12-10.gif)
+- CPU Utilization: Indicates how much processing power your database is using.
+- Free Storage Space: Ensures your database has enough storage to operate efficiently.
+- Read/Write Latency: Measures the time it takes to read/write data to the database.
 ## Appendix
 ![image](./assets/Screenshot%202024-12-10%20at%2011.15.44.png)
+`NT AUTHORITY\SYSTEM` is a built-in Windows system account that SQL Server uses for certain internal tasks and maintenance operations. It is a highly privileged account that is part of the Windows operating system and is often used by services running on Windows-based systems, including SQL Server.
+
 ### Troubleshooting
 Often, stopping and restarting the RDS Instance helps most connection issues.
 
