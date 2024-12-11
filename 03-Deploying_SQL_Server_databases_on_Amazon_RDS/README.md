@@ -179,6 +179,10 @@ View metrics such as database load.
 Top SQL queries show the most resource intensive queries.
 ![image](./assets/Screenshot%202024-12-10%20at%2010.46.40.png)
 Wait events highlight bottlenecks in query execution.
+- RESOURCE_SEMAPHORE wait type occurs when SQL Server queries are waiting for memory grants to execute. Indicates memory pressure. At 0.15 seconds, it is not critical but worth monitoring.
+- PAGEIOLATCH_SH wait type occurs when SQL Server is waiting to read data pages from disk into memory. 
+- The CPU wait type indicates the time spent by SQL Server executing queries on the CPU.
+
 ![image](./assets/Screenshot%202024-12-10%20at%2010.51.00.png)
 CloudWatch provides detailed metrics for your RDS instance, such as CPU utilization, memory usage, disk I/O, and network traffic. 
 ![image](./assets/Screenshot%202024-12-10%20at%2010.51.24.png)
