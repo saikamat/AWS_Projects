@@ -59,8 +59,10 @@ Go to [AWS Console](https://console.aws.amazon.com/console/home), and look for `
 Set configurations as illustrated in above picture.
 ### Create Subnet
 ![image](./assets/Screenshot%202024-12-09%20at%2021.14.30.png)
+
 Head to VPC Dashboard and choose `Subnets` and `Create Subnet`
 ![image](./assets/Screenshot%202024-12-09%20at%2021.17.06.png)
+
 Choose the VPC you created before. We create two subnets operating in two regions -> `10.0.1.0/24` having 256 IP addresses in one availability zone, 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.19.25.png)
 and `10.0.2.0/24` with another set of 256 IP Addresses in a different availability zone.
@@ -102,6 +104,24 @@ However if you're connecting from an application server, enter the private IP or
 
 For the outbound, set it to `0.0.0.0/0` so that RDS instance can send traffic to any destination.
 ## Create RDS
+Navigate to AWS Console and type in `RDS` and create RDS database.
+|Setting Key|Value|
+|---|---|
+|Database Creation|Standard Creation|
+|Engine Option|Microsoft SQL Server|
+|Edition|SQL Server Express*|
+|Deployment|Multi A-Z|
+|DB Instance Class|db.t3.micro|
+|Storage Type|gp2|
+|Allocated Storage|Default 20GB|
+|DB Instance Identifer|My-RDS-SQL-Server|
+|Master username|`admin`|
+|Master password|configure strong username|
+|VPC|select the RDS you created before|
+|Subnet Group|select the subnet group you created before|
+|Public Access|Enable|
+
+*Free tier, suitable for small workloads
 ![image](./assets/Screenshot%202024-12-09%20at%2022.21.43.png)
 
 ### Install Azure Data Studio
@@ -145,7 +165,7 @@ Therefore I use Azure Data Studio available from [here](https://learn.microsoft.
 ![image](./assets/Screenshot%202024-12-10%20at%2011.15.44.png)
 ### Troubleshooting
 Often, stopping and restarting the RDS Instance helps most connection issues.
-Enable Public Access while creating RDS Instance.
-| Error | Error Type | Cause | Resolution |
-|---|---|---|---|
-||||
+
+| Error Log | Cause | Resolution |
+|---|---|---|
+|The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 35 - An internal exception was caught)|Azure Data Studio client is unable to establish a connection to your Amazon RDS SQL Server instance. This is a common issue and can be caused by several factors, such as network configuration, security group rules, or incorrect connection details.|Enable Public Access while creating RDS Instance.|
