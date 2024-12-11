@@ -10,7 +10,9 @@
     - [Create Subnet](#create-subnet)
     - [Create Internet Gateway](#create-internet-gateway)
     - [Create Routing Table](#create-routing-table)
+    - [Enable DNS Hostnames (Optional)](#enable-dns-hostnames-optional)
   - [Create Security Group](#create-security-group)
+    - [Inbound and Outbound Rules](#inbound-and-outbound-rules)
   - [Create RDS](#create-rds)
     - [Install Azure Data Studio](#install-azure-data-studio)
     - [Configure Connections](#configure-connections)
@@ -63,29 +65,42 @@ Choose the VPC you created before. We create two subnets operating in two region
 ![image](./assets/Screenshot%202024-12-09%20at%2021.19.25.png)
 and `10.0.2.0/24` with another set of 256 IP Addresses in a different availability zone.
 ### Create Internet Gateway
-When your instances from inside the VPC wish to communicate with the Internet, you can use the `Internet Gateway`. 
+When your RDS instances from inside the VPC wish to communicate with the Internet, you can use the `Internet Gateway`. 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.22.47.png)
 Head to VPC Dashboard, and choose `Internet gateways` and create one.
 ![image](./assets/Screenshot%202024-12-09%20at%2021.24.44.png)
-
+Name it
 ![image](./assets/Screenshot%202024-12-09%20at%2021.25.31.png)
+and attach it to the VPC you created before.
 ### Create Routing Table
-
+The Route Table determines how traffic is routed to your VPC. This is crucial especially if your route your traffic to the internet. 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.26.49.png)
-
+In the VPC dashboard, head to `Route Tables` on the left, and select the route table associated with the VPC you created above.
 ![image](./assets/Screenshot%202024-12-09%20at%2021.27.59.png)
-
+Edit the routes, 
 ![image](./assets/Screenshot%202024-12-09%20at%2021.29.25.png)
-
+and choose the destination as `0.0.0.0/0` and target as the internet gateway that you already created before. This means all IPv4 traffic will be routed to the gateway.
 ![image](./assets/Screenshot%202024-12-09%20at%2021.31.36.png)
-
+### Enable DNS Hostnames (Optional)
 ![image](./assets/Screenshot%202024-12-09%20at%2021.32.06.png)
-
+If you want to use DNS hostnames to access resources inside your VPC, you enable this feature by heading to your VPC and editing the settings
 ![image](./assets/Screenshot%202024-12-09%20at%2021.32.50.png)
+and mark `Enable DNS hostnames` and `resolution` as shown above.
 ## Create Security Group
+Configuring Security Groups (SG) is crucial since it acts as a firewall that controls in and outbound traffic to your RDS instance.
 ![image](./assets/Screenshot%202024-12-09%20at%2021.34.52.png)
+Head to EC2 in your AWS console, and choose `Security Groups` in the left tab. Choose `Create Security Group`.
 
+### Inbound and Outbound Rules
+Inbound Rules dictate what traffic is allowed to connect to your database, while Outbound Rules dictate what traffic, the database is allowed to send out. 
+
+The inbound traffic could be SQL queries while outbound could be response to those queries.
 ![image](./assets/Screenshot%202024-12-09%20at%2021.40.59.png)
+For inbound rules, select `MSSQL` as the type. Set the source to `My IP`  if you're connecting to the databasse from your local machine. AWS automatically detects and adds your current IP address.
+
+However if you're connecting from an application server, enter the private IP or the CIDR block of the server (e.g. `10.0.2.0./24`)
+
+For the outbound, set it to `0.0.0.0/0` so that RDS instance can send traffic to any destination.
 ## Create RDS
 ![image](./assets/Screenshot%202024-12-09%20at%2022.21.43.png)
 
