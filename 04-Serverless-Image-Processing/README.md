@@ -6,8 +6,8 @@
   - [High Level Architecture](#high-level-architecture)
   - [1. S3 Bucket](#1-s3-bucket)
   - [2. Amazon Eventbridge](#2-amazon-eventbridge)
+  - [3. Lambda Functions](#3-lambda-functions)
   - [3. Step Functions](#3-step-functions)
-  - [4. Lambda Functions](#4-lambda-functions)
   - [5. AWS Rekognition](#5-aws-rekognition)
   - [6. Dynamo DB](#6-dynamo-db)
   - [7. Amazon SNS](#7-amazon-sns)
@@ -15,7 +15,7 @@
     - [Troubleshooting](#troubleshooting)
 
 ## High Level Architecture
-![image](./assets/04-serverless-imageprocessing.drawio.png){width=800px}
+![image](./assets/04-serverless-imageprocessing.drawio.png)
 1. **User Uploads an Image**: The user uploads an image to an S3 bucket.
 2. **EventBridge Triggers the Workflow**: The image upload event triggers an EventBridge rule, which starts the Step Functions state machine.
 3. **Step Functions Orchestrates the Workflow**: Step Functions invokes a Lambda function to process the image.
@@ -26,36 +26,87 @@
 ---
 ## 1. S3 Bucket
 The S3 Bucket acts as the storage for uploaded images. It triggers the workflow when a new image is uploaded.
-
 Head to `console.aws.com` and look for [S3 Bucket](https://us-east-1.console.aws.amazon.com/s3/home?region=us-east-1)
-<!--[image](./assets/Screenshot%202024-12-25%20at%2010.45.18.png){width=800px}-->
+<!--[image](./assets/Screenshot%202024-12-25%20at%2010.45.18.png)-->
 
-![image](./assets/Screenshot%202024-12-25%20at%2010.48.13.png){width=800px}
+![image](./assets/Screenshot%202024-12-25%20at%2010.48.13.png)
 Open `Bucket` >> `Permissions` and scroll down to `Event Notifications` as shown above. 
-![image](./assets/Screenshot%202024-12-25%20at%2010.49.00.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-25%20at%2010.49.00.png)
 Make sure to set the Event Bridge notifications to `On`.
-![image](./assets/Screenshot%202024-12-26%20at%2018.29.38.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-26%20at%2018.29.38.png)
 Create a bucket such as the one I've created here.
+
 ## 2. Amazon Eventbridge
-Next we configure the Amazon EventBridge. It detects the image upload event in the S3 bucket and triggers the AWS Step Functions state machine.
-![image](./assets/Screenshot%202024-12-25%20at%2010.51.50.png){width=800px}
+Next configure the Amazon EventBridge. It detects the image upload event in the S3 bucket and triggers the AWS Step Functions state machine.
+![image](./assets/Screenshot%202024-12-25%20at%2010.51.50.png)
+Head to AWS Console and look for `EventBridge`.
 
-![image](./assets/Screenshot%202024-12-25%20at%2010.52.38.png){width=800px}
+![image](./assets/Screenshot%202024-12-25%20at%2010.52.38.png)
+and create a new `Rule`.
 
-![image](./assets/Screenshot%202024-12-25%20at%2010.53.58.png){width=800px}
+![image](./assets/Screenshot%202024-12-25%20at%2010.53.58.png)
+In the new rule, set the type as with event pattern as shown above.
 
-![image](./assets/Screenshot%202024-12-25%20at%2011.17.10.png){width=800px}
+At Step 2, of building event pattern, keep the config as follows:-
+![image](./assets/Screenshot%202024-12-26%20at%2019.28.53.png)
+| Config Type | Configuration Chosen |
+|---|---|
+|Evebt Source|AWS events of EventBridge partner events|
+|Sample Event type|AWS Events|
+|Creation Method|Use pattern form|
+|Event Source|AWS Services|
+|AWS Service|Simple Storage Service (S3)|
+|Event type|Amazon S3 Event Notification|
 
+And provide the following Event pattern:-
+```json
+{
+  "source": ["aws.s3"],
+  "detail-type": ["Object Created"],
+  "detail": {
+    "bucket": {
+      "name": ["04-image-processing-bucket"]
+    }
+  }
+}
+```
+
+![image](./assets/Screenshot%202024-12-25%20at%2011.17.10.png)
+Next when selecting the target, choose `Step Functions state machine` as the type. 
+
+*However since there's no step function created yet, you cannot see any state machine in the drop down menu.*
+
+>IMPORTANT - Now this is the interesting part. 
+Each block in our architecture has target as the next block. It's not possible to configure EventBridge without completely configuring the next block, i.e. the Step Functions. Consequently, it's not possible to configure the Step Functions without completely configuring the Lambda functions. This is where you skip a few steps and jump directly to configuring the Lambda functions instead. You can return to configuring EventBridge later on. Let's keep this configuration as is in the current browser tab.
+
+## 3. Lambda Functions
+The Lambda functions execute the logic for:
+i. Invoking Amazon Rekognition to detect faces in the image.
+ii. Storing image metadata in DynamoDB.
+iii. Sending notifications via SNS.
+
+As discussed above, we skip a few steps here, to configure the Lambda functions first.
+![image](./assets/Screenshot%202024-12-25%20at%2017.23.56.png)
+Create a function that is a placeholder for processing S3 Image first.
+
+![image](./assets/Screenshot%202024-12-26%20at%2019.40.37.png)
+Use the default lambda function code logic with a single debug line to make sure you're on right track and then deploy it.
 
 ## 3. Step Functions
-![image](./assets/Screenshot%202024-12-25%20at%2011.17.50.png){width=800px}
-![image](./assets/Screenshot%202024-12-25%20at%2011.23.41.png){width=800px}
+![image](./assets/Screenshot%202024-12-25%20at%2011.17.50.png)
+![image](./assets/Screenshot%202024-12-25%20at%2011.23.41.png)
 
-![image](./assets/Screenshot%202024-12-25%20at%2011.25.36.png){width=800px}
-## 4. Lambda Functions
-![image](./assets/Screenshot%202024-12-25%20at%2017.23.56.png){width=800px}
+![image](./assets/Screenshot%202024-12-25%20at%2011.25.36.png)
 
-![image](./assets/Screenshot%202024-12-25%20at%2019.28.30.png){width=800px}
+
+---
+![image](./assets/Screenshot%202024-12-25%20at%2019.28.30.png)
+![image](./assets/chrome-capture-2024-12-25-2.gif)
+
+
+
 ## 5. AWS Rekognition
 ## 6. Dynamo DB
 ## 7. Amazon SNS
