@@ -7,7 +7,8 @@
   - [1. S3 Bucket](#1-s3-bucket)
   - [2. Amazon Eventbridge](#2-amazon-eventbridge)
   - [3. Lambda Functions](#3-lambda-functions)
-  - [3. Step Functions](#3-step-functions)
+  - [4. Step Functions](#4-step-functions)
+  - [5. Re-configure Eventbridge](#5-re-configure-eventbridge)
   - [5. AWS Rekognition](#5-aws-rekognition)
   - [6. Dynamo DB](#6-dynamo-db)
   - [7. Amazon SNS](#7-amazon-sns)
@@ -53,7 +54,7 @@ At Step 2, of building event pattern, keep the config as follows:-
 ![image](./assets/Screenshot%202024-12-26%20at%2019.28.53.png)
 | Config Type | Configuration Chosen |
 |---|---|
-|Evebt Source|AWS events of EventBridge partner events|
+|Event Source|AWS events of EventBridge partner events|
 |Sample Event type|AWS Events|
 |Creation Method|Use pattern form|
 |Event Source|AWS Services|
@@ -83,9 +84,9 @@ Each block in our architecture has target as the next block. It's not possible t
 
 ## 3. Lambda Functions
 The Lambda functions execute the logic for:
-i. Invoking Amazon Rekognition to detect faces in the image.
-ii. Storing image metadata in DynamoDB.
-iii. Sending notifications via SNS.
+1. Invoking Amazon Rekognition to detect faces in the image.
+2. Storing image metadata in DynamoDB.
+3. Sending notifications via SNS.
 
 As discussed above, we skip a few steps here, to configure the Lambda functions first.
 ![image](./assets/Screenshot%202024-12-25%20at%2017.23.56.png)
@@ -94,11 +95,35 @@ Create a function that is a placeholder for processing S3 Image first.
 ![image](./assets/Screenshot%202024-12-26%20at%2019.40.37.png)
 Use the default lambda function code logic with a single debug line to make sure you're on right track and then deploy it.
 
-## 3. Step Functions
-![image](./assets/Screenshot%202024-12-25%20at%2011.17.50.png)
-![image](./assets/Screenshot%202024-12-25%20at%2011.23.41.png)
+## 4. Step Functions
+These orchestrate the workflow by coordinating the execution of multiple AWS services (e.g., Lambda, Rekognition, DynamoDB, SNS).
 
+![image](./assets/Screenshot%202024-12-25%20at%2011.17.50.png)
+Head to AWS Console and look for step functions.
+
+![image](./assets/Screenshot%202024-12-26%20at%2019.51.27.png)
+Provide a state name as shown in the right tab and then add the Lambda Function created in previous step to the Design workflow. Choose the `Function name` on the right as the same Lambda Function.
+
+![image](./assets/Screenshot%202024-12-25%20at%2011.23.41.png)
+Once created the state machine will automatically choose a role for itself.
+
+## 5. Re-configure Eventbridge
+Now head back to the previous tab which contained the configuration for the EventBridge. Remember that this was discussed in [2. Amazon Eventbridge](#2-amazon-eventbridge).
 ![image](./assets/Screenshot%202024-12-25%20at%2011.25.36.png)
+Tap on the circular refresh icon and you should be able to see the newly created step function in the `State Machine` tab.
+
+
+We now have the following preliminary workflow ready.
+```mermaid
+graph LR
+
+A(User uploads image)
+A --> B(EventBridge is triggered)
+B --> C(Step functions invoked)
+C --> D(Lambda function invoked)
+D --> E(Events logged on 
+Cloudwatch)
+```
 
 
 ---
