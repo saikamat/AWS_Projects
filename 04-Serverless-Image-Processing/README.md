@@ -9,6 +9,7 @@
   - [3. Lambda Functions](#3-lambda-functions)
   - [4. Step Functions](#4-step-functions)
   - [5. Re-configure Eventbridge](#5-re-configure-eventbridge)
+  - [6. Test Run](#6-test-run)
   - [5. AWS Rekognition](#5-aws-rekognition)
   - [6. Dynamo DB](#6-dynamo-db)
   - [7. Amazon SNS](#7-amazon-sns)
@@ -35,9 +36,6 @@ Open `Bucket` >> `Permissions` and scroll down to `Event Notifications` as shown
 
 ![image](./assets/Screenshot%202024-12-25%20at%2010.49.00.png)
 Make sure to set the Event Bridge notifications to `On`.
-
-![image](./assets/Screenshot%202024-12-26%20at%2018.29.38.png)
-Create a bucket such as the one I've created here.
 
 ## 2. Amazon Eventbridge
 Next configure the Amazon EventBridge. It detects the image upload event in the S3 bucket and triggers the AWS Step Functions state machine.
@@ -112,7 +110,7 @@ Now head back to the previous tab which contained the configuration for the Even
 ![image](./assets/Screenshot%202024-12-25%20at%2011.25.36.png)
 Tap on the circular refresh icon and you should be able to see the newly created step function in the `State Machine` tab.
 
-
+## 6. Test Run
 We now have the following preliminary workflow ready.
 ```mermaid
 graph LR
@@ -124,6 +122,11 @@ C --> D(Lambda function invoked)
 D --> E(Events logged on 
 Cloudwatch)
 ```
+
+1. Upload image to S3 bucket
+![image](./assets/Screenshot%202024-12-26%20at%2018.29.38.png)
+
+2. Check whether lambda function is invoked
 
 
 ---
