@@ -1,12 +1,9 @@
 # Serverless Image processing
-> Swich to `assets` branch for illustrated Readme.
+
 ## Table of Contents
 - [Serverless Image processing](#serverless-image-processing)
   - [Table of Contents](#table-of-contents)
-  - [Appendix](#appendix)
-    - [Troubleshooting](#troubleshooting)
   - [High Level Architecture](#high-level-architecture)
-    - [Workflow](#workflow)
   - [1. S3 Bucket](#1-s3-bucket)
   - [2. Amazon Eventbridge](#2-amazon-eventbridge)
   - [3. Step Functions](#3-step-functions)
@@ -14,22 +11,152 @@
   - [5. AWS Rekognition](#5-aws-rekognition)
   - [6. Dynamo DB](#6-dynamo-db)
   - [7. Amazon SNS](#7-amazon-sns)
-  - [Appendix](#appendix-1)
-    - [Troubleshooting](#troubleshooting-1)
-
-## Appendix
-### Troubleshooting
+  - [Appendix](#appendix)
+    - [Troubleshooting](#troubleshooting)
 
 ## High Level Architecture
-![image](./assets/04-serverless-imageprocessing.drawio.png)
-### Workflow
+![image](./assets/04-serverless-imageprocessing.drawio.png){width=800px}
+1. **User Uploads an Image**: The user uploads an image to an S3 bucket.
+2. **EventBridge Triggers the Workflow**: The image upload event triggers an EventBridge rule, which starts the Step Functions state machine.
+3. **Step Functions Orchestrates the Workflow**: Step Functions invokes a Lambda function to process the image.
+4. **Image Processing**: The Lambda function uses Amazon Rekognition to analyze the image and check for faces. The result (e.g., "Face Detected" or "No Face Detected") is stored in DynamoDB.
+5. **Notification**: Another Lambda function sends a notification via SNS to inform the user of the result.
+6. **User Receives Notification**: The user receives an email or SMS with the processing result.
+
+---
 ## 1. S3 Bucket
+The S3 Bucket acts as the storage for uploaded images. It triggers the workflow when a new image is uploaded.
+
+Head to `console.aws.com` and look for [S3 Bucket](https://us-east-1.console.aws.amazon.com/s3/home?region=us-east-1)
+<!--[image](./assets/Screenshot%202024-12-25%20at%2010.45.18.png){width=800px}-->
+
+![image](./assets/Screenshot%202024-12-25%20at%2010.48.13.png){width=800px}
+Open `Bucket` >> `Permissions` and scroll down to `Event Notifications` as shown above. 
+![image](./assets/Screenshot%202024-12-25%20at%2010.49.00.png){width=800px}
+Make sure to set the Event Bridge notifications to `On`.
+![image](./assets/Screenshot%202024-12-26%20at%2018.29.38.png){width=800px}
+Create a bucket such as the one I've created here.
 ## 2. Amazon Eventbridge
+Next we configure the Amazon EventBridge. It detects the image upload event in the S3 bucket and triggers the AWS Step Functions state machine.
+![image](./assets/Screenshot%202024-12-25%20at%2010.51.50.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-25%20at%2010.52.38.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-25%20at%2010.53.58.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-25%20at%2011.17.10.png){width=800px}
+
+
 ## 3. Step Functions
+![image](./assets/Screenshot%202024-12-25%20at%2011.17.50.png){width=800px}
+![image](./assets/Screenshot%202024-12-25%20at%2011.23.41.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-25%20at%2011.25.36.png){width=800px}
 ## 4. Lambda Functions
+![image](./assets/Screenshot%202024-12-25%20at%2017.23.56.png){width=800px}
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.28.30.png){width=800px}
 ## 5. AWS Rekognition
 ## 6. Dynamo DB
 ## 7. Amazon SNS
 
 ## Appendix
 ### Troubleshooting
+
+
+
+
+
+
+<!-- ![image](./assets/Screenshot%202024-12-25%20at%2017.16.32.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.18.07.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.19.06.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.19.20.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.20.11.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.20.32.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.21.34.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.22.08.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.22.23.png)
+
+
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.35.23.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.35.41.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.37.41.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.38.09.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.41.30.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.41.47.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.44.16.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.44.26.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.16.02.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.17.07.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.18.31.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.20.22.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.21.15.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.21.49.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.45.33.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.56.30.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.57.32.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.58.42.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2018.59.27.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.00.24.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.07.29.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.27.13.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.27.27.png)
+
+
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.30.58.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.32.53.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.38.41.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.43.05.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.48.28.png)
+
+![image](./assets/Screenshot%202024-12-25%20at%2019.52.56.png)
+
+![image](./assets/Screenshot%202024-12-26%20at%2012.14.30.png)
+
+![image](./assets/Screenshot%202024-12-26%20at%2012.15.26.png)
+
+![image](./assets/Screenshot%202024-12-26%20at%2012.15.40.png)
+
+![image](./assets/Screenshot%202024-12-26%20at%2012.15.50.png)
+
+![image](./assets/Screenshot%202024-12-26%20at%2016.53.31.png) -->
+
+
+

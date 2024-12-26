@@ -29,13 +29,9 @@ def generate_markdown_from_images(images_dir, output_file):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Define the directory containing images and the output markdown file
-<<<<<<< HEAD
-images_directory = "images"
-=======
-images_directory = "03-Deploying_SQL_Server_databases_on_Amazon_RDS/assets"
->>>>>>> assets
-output_markdown_file = "output.md"
+
+images_directory = "04-Serverless-Image-Processing/assets"
+output_markdown_file = "04-Serverless-Image-Processing/output.md"
 
 # Generate the markdown file
 generate_markdown_from_images(images_directory, output_markdown_file)
