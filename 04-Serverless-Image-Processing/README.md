@@ -128,12 +128,17 @@ Cloudwatch)
 
 2. Check whether lambda function is invoked
 
+![image](./assets/Screenshot%202024-12-26%20at%2020.08.02.png)
+Head to Lambda Function and check the metrics underneath the fucntion.
 
----
-![image](./assets/Screenshot%202024-12-25%20at%2019.28.30.png)
-![image](./assets/chrome-capture-2024-12-25-2.gif)
+![image](./assets/Screenshot%202024-12-27%20at%2010.05.00.png)
+Under Cloudwatch logs, take a look at the log statements. As you can see here, the debug line inserted in sample code has also been invoked. This proves that Lambda function was called when image was uploaded.
 
+![image](./assets/Screenshot%202024-12-27%20at%2010.05.43.png)
+You can trace the flow backwards, from Lambda towards Step Functions to see if the Step Function indeed invoked the Lambda function as shown above.
 
+![image](./assets/chrome-capture-2024-12-27.gif)
+Continuing with backtracing, you can head to EventBridge to see when the EventBridge rule was triggered, as shown above.
 
 ## 5. AWS Rekognition
 ## 6. Dynamo DB
@@ -147,7 +152,11 @@ Cloudwatch)
 
 
 
-<!-- ![image](./assets/Screenshot%202024-12-25%20at%2017.16.32.png)
+<!-- 
+![image](./assets/Screenshot%202024-12-25%20at%2019.28.30.png)
+![image](./assets/chrome-capture-2024-12-25-2.gif)
+
+![image](./assets/Screenshot%202024-12-25%20at%2017.16.32.png)
 
 ![image](./assets/Screenshot%202024-12-25%20at%2017.18.07.png)
 
