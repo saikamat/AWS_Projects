@@ -10,7 +10,11 @@
   - [4. Step Functions](#4-step-functions)
   - [5. Re-configure Eventbridge](#5-re-configure-eventbridge)
   - [6. Test Run](#6-test-run)
-  - [5. AWS Rekognition](#5-aws-rekognition)
+  - [7. AWS Rekognition](#7-aws-rekognition)
+    - [a. Modify IAM Role](#a-modify-iam-role)
+    - [b. Modify S3 Bucket Policy](#b-modify-s3-bucket-policy)
+    - [c. Lambda Function](#c-lambda-function)
+    - [d. Test Run](#d-test-run)
   - [6. Dynamo DB](#6-dynamo-db)
   - [7. Amazon SNS](#7-amazon-sns)
   - [Appendix](#appendix)
@@ -122,6 +126,7 @@ C --> D(Lambda function invoked)
 D --> E(Events logged on 
 Cloudwatch)
 ```
+The job of the test run is to ensure that the workflow works.
 
 1. Upload image to S3 bucket
 ![image](./assets/Screenshot%202024-12-26%20at%2018.29.38.png)
@@ -140,7 +145,72 @@ You can trace the flow backwards, from Lambda towards Step Functions to see if t
 ![image](./assets/chrome-capture-2024-12-27.gif)
 Continuing with backtracing, you can head to EventBridge to see when the EventBridge rule was triggered, as shown above.
 
-## 5. AWS Rekognition
+## 7. AWS Rekognition
+Now that we have the blocks in place, we can go on to modify the lambda function so that we can invoke AWS Rekognition. This is an AWS computer vision service that analyses the uploaded image to detect if a face is present.
+
+### a. Modify IAM Role
+![image](./assets/Screenshot%202024-12-27%20at%2010.49.37.png)
+Head to IAM and select the role associated with your Lambda Function.
+
+![image](./assets/Screenshot%202024-12-27%20at%2010.50.53.png)
+Modify the permissions as shown above.
+
+### b. Modify S3 Bucket Policy
+![image](./assets/Screenshot%202024-12-27%20at%2010.52.48.png)
+Ensure the S3 bucket policy allows Rekognition and Lambda to access the images.
+
+### c. Lambda Function
+Remember that the event structure you're receiving is from Amazon EventBridge, not directly from an S3 event notification. EventBridge events have a different structure compared to the native S3 event notifications. Create your lambda function such as one created here:-
+```python3
+import boto3
+from urllib.parse import unquote
+
+def lambda_handler(event, context):
+    # Log the event for debugging
+    print(f"Event: {event}")
+
+    # Check if the event contains the 'detail' key
+    if 'detail' not in event:
+        print("Error: Event does not contain 'detail'")
+        return {
+            'statusCode': 400,
+            'body': "Invalid event structure. 'detail' key is missing."
+        }
+
+    # Extract the S3 bucket name and object key from the EventBridge event
+    try:
+        s3_bucket = event['detail']['bucket']['name']
+        # further code below
+```      
+
+For more refer here:-
+[Process Image Lambda Function](./lambdaFunctions/processImageLambdaFunction.py)
+
+### d. Test Run
+![image](https://media.istockphoto.com/id/507994912/photo/portrait-of-young-man-smiling-to-camera.jpg?s=612x612&w=0&k=20&c=428YqkZo4zRGGXRRJl-BBgsPVugarZQyCafXuFB127U=)
+After deploying the above lamba function, test it with a sample image such as the one above.
+
+![image](./assets/Screenshot%202024-12-27%20at%2011.13.23.png)
+When checking the Lambda function's cloud watch logs, you should see output as shown above.
+
+For more refer here:-
+[Face Rekognition Output](./outputs/rekognitionOutput01.json)
+
+With this test run we have added one more block to our workflow.
+```mermaid
+graph LR
+
+A(User uploads image)
+A --> B(EventBridge is triggered)
+B --> C(Step functions invoked)
+C --> D(Lambda function invoked)
+D --> E(**Rekognition analyses 
+Image**)
+E --> F(Events logged on 
+Cloudwatch)
+```
+
+
 ## 6. Dynamo DB
 ## 7. Amazon SNS
 
