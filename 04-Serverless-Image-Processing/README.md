@@ -16,6 +16,10 @@
     - [c. Lambda Function](#c-lambda-function)
     - [d. Test Run](#d-test-run)
   - [6. Dynamo DB](#6-dynamo-db)
+    - [a. Create DynamoDB Table](#a-create-dynamodb-table)
+    - [b. Modify IAM Role](#b-modify-iam-role)
+    - [c. Modify the Process Image Lambda function](#c-modify-the-process-image-lambda-function)
+    - [d. Test Run](#d-test-run-1)
   - [7. Amazon SNS](#7-amazon-sns)
   - [Appendix](#appendix)
     - [Troubleshooting](#troubleshooting)
@@ -150,14 +154,14 @@ Now that we have the blocks in place, we can go on to modify the lambda function
 
 ### a. Modify IAM Role
 ![image](./assets/Screenshot%202024-12-27%20at%2010.49.37.png)
-Head to IAM and select the role associated with your Lambda Function.
+<br>Head to IAM and select the role associated with your Lambda Function.
 
 ![image](./assets/Screenshot%202024-12-27%20at%2010.50.53.png)
-Modify the permissions as shown above.
+<br>Modify the permissions as shown above.
 
 ### b. Modify S3 Bucket Policy
 ![image](./assets/Screenshot%202024-12-27%20at%2010.52.48.png)
-Ensure the S3 bucket policy allows Rekognition and Lambda to access the images.
+<br>Ensure the S3 bucket policy allows Rekognition and Lambda to access the images.
 
 ### c. Lambda Function
 Remember that the event structure you're receiving is from Amazon EventBridge, not directly from an S3 event notification. EventBridge events have a different structure compared to the native S3 event notifications. Create your lambda function such as one created here:-
@@ -188,7 +192,7 @@ For more refer here:-
 
 ### d. Test Run
 ![image](https://media.istockphoto.com/id/507994912/photo/portrait-of-young-man-smiling-to-camera.jpg?s=612x612&w=0&k=20&c=428YqkZo4zRGGXRRJl-BBgsPVugarZQyCafXuFB127U=)
-After deploying the above lamba function, test it with a sample image such as the one above.
+<br>After deploying the above lamba function, test it with a sample image such as the one above.
 
 ![image](./assets/Screenshot%202024-12-27%20at%2011.13.23.png)
 When checking the Lambda function's cloud watch logs, you should see output as shown above.
@@ -209,13 +213,72 @@ Image**)
 E --> F(Events logged on 
 Cloudwatch)
 ```
-
-
 ## 6. Dynamo DB
+DynamoDB stores metadata about the processed images (e.g., image name, face detection result, timestamp).
+
+### a. Create DynamoDB Table
+![image](./assets/Screenshot%202024-12-27%20at%2012.08.10.png)
+Create a new table with settings shown above.
+
+### b. Modify IAM Role
+Similar to how you modified the IAM role for AWS Rekognition, allow the same Lambda role to access DynamoDB. Add the following as inline policy:-
+```json
+{
+   "Effect": "Allow",
+   "Action": "dynamodb:PutItem",
+   "Resource": "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/DYNAMO_DB_TABLE_NAME"
+}
+```
+
+### c. Modify the Process Image Lambda function
+Modify the previously created lambda function so that the metadata is stored in the DynamoDB table. Here's an excerpt of the code:-
+```python3
+# Initialize the DynamoDB client
+        dynamodb = boto3.client('dynamodb', region_name='us-east-1')
+
+        # Prepare the metadata to store in DynamoDB
+        metadata = {
+            'ImageID': {'S': s3_key},  # Use the S3 object key as the unique ID
+            'FaceDetected': {'BOOL': face_detected},  # Boolean value
+            'Timestamp': {'S': datetime.utcnow().isoformat()}  # Current timestamp
+        }
+
+        # Optionally, include detailed face attributes if faces are detected
+        if face_detected:
+            metadata['FaceDetails'] = {'S': json.dumps(response['FaceDetails'])}
+
+        # Log the metadata before writing to DynamoDB
+        print(f"Metadata to store in DynamoDB: {metadata}")
+
+        # Store the metadata in the DynamoDB table
+        dynamodb.put_item(
+            TableName='DynamoDBTable-ImageMetaData',  # Replace with your table name
+            Item=metadata
+        )
+        print("Metadata stored in DynamoDB.")
+```
+
+You can find the entire lambda function code here:-
+[Process Image and store results to database](./lambdaFunctions/processImageAndStoreResult.py)
+
+### d. Test Run
+Deploy the above code and upload a new image.
+
+![image](./assets/Screenshot%202024-12-27%20at%2012.20.57.png)
+<br>Head to Dynamo DB and click on `Explore table items`.
+
+![image](./assets/chrome-capture-2024-12-27-2.gif)
+The meta data of the newly uploaded image can be seen here.
+
+
 ## 7. Amazon SNS
 
 ## Appendix
+
 ### Troubleshooting
+| Error | Cause | Resolution |
+|---|---|---|
+|No results in Dynamo DB, but visible uptick in table metrics|If the ImageID is not unique for each image, DynamoDB will overwrite the existing record with the same ImageID.|Ensure that ImageID is unique for each image|
 
 
 
@@ -224,7 +287,7 @@ Cloudwatch)
 
 <!-- 
 ![image](./assets/Screenshot%202024-12-25%20at%2019.28.30.png)
-![image](./assets/chrome-capture-2024-12-25-2.gif)
+
 
 ![image](./assets/Screenshot%202024-12-25%20at%2017.16.32.png)
 
