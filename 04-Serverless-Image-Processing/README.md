@@ -21,6 +21,12 @@
     - [c. Modify the Process Image Lambda function](#c-modify-the-process-image-lambda-function)
     - [d. Test Run](#d-test-run-1)
   - [7. Amazon SNS](#7-amazon-sns)
+    - [a. Create SNS Topic](#a-create-sns-topic)
+    - [b. Create SNS Subscription](#b-create-sns-subscription)
+    - [c. Create Lambda Function](#c-create-lambda-function)
+    - [d. Modify IAM permissions](#d-modify-iam-permissions)
+    - [e. Add Step Function](#e-add-step-function)
+  - [Final Run](#final-run)
   - [Appendix](#appendix)
     - [Troubleshooting](#troubleshooting)
 
@@ -268,17 +274,82 @@ Deploy the above code and upload a new image.
 <br>Head to Dynamo DB and click on `Explore table items`.
 
 ![image](./assets/chrome-capture-2024-12-27-2.gif)
-The meta data of the newly uploaded image can be seen here.
-
+<br>The meta data of the newly uploaded image can be seen here.
 
 ## 7. Amazon SNS
+Amazon SNS is a service used to send notifications (e.g., email or SMS) to users about the processing result.
+### a. Create SNS Topic
+![image](./assets/Screenshot%202024-12-27%20at%2013.45.43.png)
+<br>Go to the SNS Console and create a topic (e.g., ImageProcessingResults). Leave the default settings for encryption and access policy unless you have specific requirements.
+
+### b. Create SNS Subscription
+![image](./assets/Screenshot%202024-12-27%20at%2013.46.03.png)
+<br>In the SNS Console, select the topic you just created and create subscription. 
+Select the protocol for the notification:
+- Email: Sends notifications to an email address.
+- SMS: Sends notifications to a phone number.
+- Other options: HTTP/HTTPS, Lambda, etc.
+![image](./assets/Screenshot%202024-12-27%20at%2013.47.46.png)
+<br>For Email, enter the recipient's email address.
+
+![image](./assets/Screenshot%202024-12-27%20at%2013.51.19.png)
+<br>If you chose Email, the recipient will receive a confirmation email. They must click the confirmation link to activate the subscription.
+
+![image](./assets/Screenshot%202024-12-27%20at%2013.51.42.png)
+<br>Once confirmed, the SNS subscription will show status accordingly.
+
+### c. Create Lambda Function
+You need a Lambda function that publishes a message to the SNS topic. This function will be invoked by Step Functions.
+
+Here's an excerpt of the code:-
+```python3
+import boto3
+import json
+
+def lambda_handler(event, context):
+    # Initialize the SNS client
+    sns = boto3.client('sns', region_name='us-east-1')
+
+    # Extract details from the event (passed by Step Functions)
+    try:
+        body = event.get('body', {})
+        image_id = body.get('s3_key', 'Unknown Image')
+        face_detected = body.get('face_detected', False)
+        print(f"image_id: {image_id}")
+        message = f"Face detected in image: {image_id}" if face_detected else f"No face detected in image: {image_id}"
+        print(f"Message to send: {message}")
+        # ...
+        # Further code to follow
+```
+You can find the entire lambda function code here:-
+[Send SNS Notifications](./lambdaFunctions/sendNotifications.py)
+
+### d. Modify IAM permissions
+Ensure that the role associated with the Lambda function created in previous step has the necessary permissions to publish to the SNS topic. 
+![image](./assets/Screenshot%202024-12-27%20at%2021.56.00.png)
+<br>The IAM role should include as shown above.
+
+### e. Add Step Function
+Extend your existing Step Function created in the [previous step](#4-step-functions), to include the notification step.
+![image](./assets/Screenshot%202024-12-27%20at%2022.50.13.png)
+<br>After the `State-LambdaInvoke-ProcessImage` step, add a new state to invoke the `Lambda-SendNotification` function. The Payload is passed from the previous state (State-LambdaInvoke-ProcessImage), so the notification Lambda function will receive the output of the image processing Lambda function. <br><br>This means once the image processing is complete, the workflow transitions to State-LambdaInvoke-SendNotification.
+
+## Final Run
+
+Upload a fresh image on S3.
+
+![image](./assets/Screenshot%202024-12-27%20at%2023.31.57.png)
+<br>As per the workflow, the image upload will eventually invoke the SNS notification lambda function. As illustrated above, you can see the results of this lambda function.
+
+![image](./assets/Screenshot%202024-12-27%20at%2023.31.33.png)
+<br>And subsequently verify the subscribed email ID. As you can see here, we have the notification from AWS, that the image was detected.
 
 ## Appendix
-
 ### Troubleshooting
 | Error | Cause | Resolution |
 |---|---|---|
 |No results in Dynamo DB, but visible uptick in table metrics|If the ImageID is not unique for each image, DynamoDB will overwrite the existing record with the same ImageID.|Ensure that ImageID is unique for each image|
+|Step function not authorised to perform lambda: Invoke function| Step function is not provided sufficient credentials to run the lambda function | Modify the Step Function's inline policy|
 
 
 
