@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an S3 bucket for static website hosting with navigation.
+
+Resources:
+  # S3 Bucket
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: s3-bucket-with-cloud-formation # Replace with a unique name
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  # S3 Bucket Policy for Public Read Access
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MyS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${MyS3Bucket}/*"
+
+  # S3 Bucket Content (Custom Resource to Upload Files)
+  WebsiteContent:
+    Type: Custom::S3WebsiteContent
+    Properties:
+      ServiceToken: !GetAtt S3ContentUploader.Arn
+      BucketName: !Ref MyS3Bucket
+      Files:
+        - FileName: index.html
+          Content: |
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Welcome</title>
+            </head>
+            <body>
+              <h1>Welcome to My Static Website!</h1>
+              <p>This is a simple static website hosted on S3.</p>
+              <button onclick="location.href='about.html'">Go to About Page</button>
+            </body>
+            </html>
+        - FileName: about.html
+          Content: |
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>About</title>
+            </head>
+            <body>
+              <h1>About Page</h1>
+              <p>This is the about page of the static website.</p>
+              <button onclick="location.href='index.html'">Go Back to Home</button>
+            </body>
+            </html>
+
+  # Lambda Function to Upload Files to S3
+  S3ContentUploader:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Runtime: python3.9
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+
+          def handler(event, context):
+              s3 = boto3.client('s3')
+              try:
+                  if event['RequestType'] == 'Create':
+                      bucket_name = event['ResourceProperties']['BucketName']
+                      files = event['ResourceProperties']['Files']
+                      for file in files:
+                          s3.put_object(
+                              Bucket=bucket_name,
+                              Key=file['FileName'],
+                              Body=file['Content'],
+                              ContentType='text/html'
+                          )
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+
+  # IAM Role for Lambda Function
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub "arn:aws:s3:::${MyS3Bucket}/*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+
+# --------------------------------------------------------------------------------
+# T02 - STATIC WEBSITE ON S3 CREATION
+# AWSTemplateFormatVersion: '2010-09-09'
+# Description: CloudFormation template to create an S3 bucket for static website hosting.
+
+# Resources:
+#   # S3 Bucket
+#   MyS3Bucket:
+#     Type: AWS::S3::Bucket
+#     Properties:
+#       BucketName: s3-bucket-with-cloud-formation # Replace with a unique name
+#       PublicAccessBlockConfiguration:
+#         BlockPublicAcls: false
+#         BlockPublicPolicy: false
+#         IgnorePublicAcls: false
+#         RestrictPublicBuckets: false
+#       WebsiteConfiguration:
+#         IndexDocument: index.html
+#         # ErrorDocument: error.html
+
+#   # S3 Bucket Policy for Public Read Access
+#   S3BucketPolicy:
+#     Type: AWS::S3::BucketPolicy
+#     Properties:
+#       Bucket: !Ref MyS3Bucket
+#       PolicyDocument:
+#         Version: '2012-10-17'
+#         Statement:
+#           - Sid: PublicReadGetObject
+#             Effect: Allow
+#             Principal: "*"
+#             Action: s3:GetObject
+#             Resource: !Sub "arn:aws:s3:::${MyS3Bucket}/*"
+
+#   # S3 Bucket Content (Custom Resource to Upload Files)
+#   WebsiteContent:
+#     Type: Custom::S3WebsiteContent
+#     Properties:
+#       ServiceToken: !GetAtt S3ContentUploader.Arn
+#       BucketName: !Ref MyS3Bucket
+#       Files:
+#         - FileName: index.html
+#           Content: |
+#             <!DOCTYPE html>
+#             <html>
+#             <head>
+#               <title>Welcome</title>
+#             </head>
+#             <body>
+#               <h1>Welcome to My Static Website!</h1>
+#               <p>This is a simple static website hosted on S3.</p>
+#             </body>
+#             </html>
+
+#   # Lambda Function to Upload Files to S3
+#   S3ContentUploader:
+#     Type: AWS::Lambda::Function
+#     Properties:
+#       Handler: index.handler
+#       Runtime: python3.9
+#       Role: !GetAtt LambdaExecutionRole.Arn
+#       Code:
+#         ZipFile: |
+#           import boto3
+#           import cfnresponse
+
+#           def handler(event, context):
+#               s3 = boto3.client('s3')
+#               try:
+#                   if event['RequestType'] == 'Create':
+#                       bucket_name = event['ResourceProperties']['BucketName']
+#                       files = event['ResourceProperties']['Files']
+#                       for file in files:
+#                           s3.put_object(
+#                               Bucket=bucket_name,
+#                               Key=file['FileName'],
+#                               Body=file['Content'],
+#                               ContentType='text/html'
+#                           )
+#                   cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+#               except Exception as e:
+#                   cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+
+#   # IAM Role for Lambda Function
+#   LambdaExecutionRole:
+#     Type: AWS::IAM::Role
+#     Properties:
+#       AssumeRolePolicyDocument:
+#         Version: '2012-10-17'
+#         Statement:
+#           - Effect: Allow
+#             Principal:
+#               Service: lambda.amazonaws.com
+#             Action: sts:AssumeRole
+#       Policies:
+#         - PolicyName: S3AccessPolicy
+#           PolicyDocument:
+#             Version: '2012-10-17'
+#             Statement:
+#               - Effect: Allow
+#                 Action:
+#                   - s3:PutObject
+#                 Resource: !Sub "arn:aws:s3:::${MyS3Bucket}/*"
+#               - Effect: Allow
+#                 Action:
+#                   - logs:CreateLogGroup
+#                   - logs:CreateLogStream
+#                   - logs:PutLogEvents
+#                 Resource: "*"
+
+# --------------------------------------------------------------------------------
+# T01 - SIMPLE S3 BUCKET CREATION
+# AWSTemplateFormatVersion: '2010-09-09'
+# Description: A simple CloudFormation template to create an S3 bucket.
+
+# Resources:
+#   MyS3Bucket:
+#     Type: AWS::S3::Bucket
+#     Properties:
+#       BucketName: s3-bucket-with-cloud-formation # Replace with a unique name
+#       PublicAccessBlockConfiguration:
+#         BlockPublicAcls: true
+#         BlockPublicPolicy: true
+#         IgnorePublicAcls: true
+#         RestrictPublicBuckets: true
+#       Tags:
+#       - Key: Environment
+#         Value: Development
